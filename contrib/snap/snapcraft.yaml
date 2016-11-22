@@ -1,0 +1,32 @@
+name: nginx
+version: "daily"
+summary: the webserver to rule them all
+description: |
+  Web Server and Load Balancer to rule them all
+confinement: strict
+
+apps:
+  nginx:
+    command: nginx
+    plugs:
+      - network
+      - network-bind
+      - mount-observe
+
+parts:
+  nginx:
+    source: ../../
+    source-type: git
+    plugin: nginx
+    build-packages:
+      - libssl-dev
+      - libpcre3-dev
+      - zlib1g-dev
+
+  env:
+    plugin: nil
+    stage-packages:
+      - libpcre3
+      - libssl1.0.0
+      - zlib1g
+    after: [nginx]
