@@ -142,7 +142,8 @@ jobs:
           $NGINX_CONFIGURE_CMD_WIN \
           $NGINX_CONFIGURE_CC_MINGW \
           $NGINX_CONFIGURE_ADD_STATIC \
-          --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT"
+          --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
+          || cat /d/a/nginx/nginx/objs/lib/pcre/config.log
           make
 
       - name: Run tests
