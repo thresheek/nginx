@@ -35,6 +35,28 @@ jobs:
       - name: checkout v4
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
+      - name: Check out nginx tests
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          repository: nginx/nginx-tests
+          path: nginx-tests
+
+      - name: Upgrade perl
+        shell: cmd
+        run: |
+          perl --version
+          choco uninstall strawberryperl
+          choco install --no-progress strawberryperl
+          perl --version
+
+      - name: Install msys2
+        if: startsWith( matrix.toolchain, 'mingw')
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.toolchain }}
+          install: autoconf automake base-devel git make mingw-w64-${{ matrix.env }}-gcc
+          update: true
+
       - name: Set the defaults and set up environment
         run: |
             ENV_JSON=$(cat <<EOF
@@ -99,20 +121,7 @@ jobs:
 
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
             echo "VCARCH=${{ matrix.env }}" >> $GITHUB_ENV
-
-      - name: Check out nginx tests
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        with:
-          repository: nginx/nginx-tests
-          path: nginx-tests
-
-      - name: Upgrade perl
-        shell: cmd
-        run: |
-          perl --version
-          choco uninstall strawberryperl
-          choco install --no-progress strawberryperl
-          perl --version
+            echo "CL=/MP" >> $GITHUB_ENV
 
       - name: Install msys2
         if: startsWith( matrix.toolchain, 'mingw')
@@ -157,13 +166,13 @@ jobs:
           $NGINX_CONFIGURE_CC_MINGW \
           $NGINX_CONFIGURE_ADD_STATIC \
           --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT"
-          make
+          make -j4
 
       - name: Run tests
         shell: cmd
         run: |
           cd nginx-tests
-          prove -v ../t .
+          prove -v -j4 ../t .
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
@@ -209,13 +218,13 @@ jobs:
           $NGINX_CONFIGURE_ADD_STATIC \
           --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
           --with-debug
-          make
+          make -j4
 
       - name: Run tests with debug
         shell: cmd
         run: |
           cd nginx-tests
-          prove -v ../t .
+          prove -v -j4 ../t .
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
@@ -248,14 +257,13 @@ jobs:
           $NGINX_CONFIGURE_ADD_DYNAMIC \
           --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
           --with-debug
-          make
+          make -j4
 
       - name: Run tests dynamic debug
         if: startsWith( matrix.toolchain, 'mingw')
-        shell: msys2 {0}
         run: |
           cd nginx-tests
-          prove -v ../t .
+          prove -v -j4 ../t .
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
