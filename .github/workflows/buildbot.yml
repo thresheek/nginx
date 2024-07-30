@@ -70,11 +70,11 @@ jobs:
                       --with-stream_ssl_preread_module \
                       --with-stream_realip_module \
                       --with-openssl=objs/lib/openssl \
-                      --with-openssl-opt='no-asm no-tests -D_WIN32_WINNT=0x0501'",
             "NGINX_CONFIGURE_CC_MSVC": "--with-cc=cl",
             "NGINX_CONFIGURE_CC_MINGW": "--with-cc=/c/strawberry/c/bin/gcc",
             "NGINX_CONFIGURE_ADD_STATIC": "--with-stream --with-mail",
-            "NGINX_CONFIGURE_ADD_DYNAMIC": "--with-stream=dynamic --with-mail=dynamic"
+            "NGINX_CONFIGURE_ADD_DYNAMIC": "--with-stream=dynamic --with-mail=dynamic",
+            "NGINX_CONFIGURE_OPENSSL_OPT": "no-asm no-tests -D_WIN32_WINNT=0x0501"
             }
             EOF
             )
@@ -84,12 +84,14 @@ jobs:
             NGINX_CONFIGURE_CC_MINGW=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_CC_MINGW')
             NGINX_CONFIGURE_ADD_STATIC=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_ADD_STATIC')
             NGINX_CONFIGURE_ADD_DYNAMIC=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_ADD_DYNAMIC')
+            NGINX_CONFIGURE_OPENSSL_OPT=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_OPENSSL_OPT')
 
             echo NGINX_CONFIGURE_CMD_WIN="$NGINX_CONFIGURE_CMD_WIN" >> $GITHUB_ENV
             echo NGINX_CONFIGURE_CC_MSVC="$NGINX_CONFIGURE_CC_MSVC" >> $GITHUB_ENV
             echo NGINX_CONFIGURE_CC_MINGW="$NGINX_CONFIGURE_CC_MINGW" >> $GITHUB_ENV
             echo NGINX_CONFIGURE_ADD_STATIC="$NGINX_CONFIGURE_ADD_STATIC" >> $GITHUB_ENV
             echo NGINX_CONFIGURE_ADD_DYNAMIC="$NGINX_CONFIGURE_ADD_DYNAMIC" >> $GITHUB_ENV
+            echo NGINX_CONFIGURE_OPENSSL_OPT="$NGINX_CONFIGURE_OPENSSL_OPT" >> $GITHUB_ENV
 
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
             echo "VCARCH=${{ matrix.vcarch }}" >> $GITHUB_ENV
@@ -126,14 +128,21 @@ jobs:
         run: |
           @echo on
           call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MSVC% %NGINX_CONFIGURE_ADD_STATIC%
+          bash \
+            %NGINX_CONFIGURE_CMD_WIN% \
+            %NGINX_CONFIGURE_CC_MSVC% \
+            %NGINX_CONFIGURE_ADD_STATIC% \
+            --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%"
           nmake -f objs/Makefile
 
       - name: Configure and build ${{ matrix.compiler }}
         if: matrix.compiler == 'mingw'
         shell: msys2 {0}
         run: |
-          $NGINX_CONFIGURE_CMD_WIN $NGINX_CONFIGURE_CC_MINGW $NGINX_CONFIGURE_ADD_STATIC
+          $NGINX_CONFIGURE_CMD_WIN \
+          $NGINX_CONFIGURE_CC_MINGW \
+          $NGINX_CONFIGURE_ADD_STATIC \
+          --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT"
           make
 
       - name: Run tests
@@ -170,14 +179,23 @@ jobs:
         run: |
           @echo on
           call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MSVC% %NGINX_CONFIGURE_ADD_STATIC% --with-debug
+          bash \
+          %NGINX_CONFIGURE_CMD_WIN% \
+          %NGINX_CONFIGURE_CC_MSVC% \
+          %NGINX_CONFIGURE_ADD_STATIC% \
+          --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%" \
+          --with-debug
           nmake -f objs/Makefile
 
       - name: Configure and build ${{ matrix.compiler }} with debug
         if: matrix.compiler == 'mingw'
         shell: msys2 {0}
         run: |
-          $NGINX_CONFIGURE_CMD_WIN $NGINX_CONFIGURE_CC_MINGW $NGINX_CONFIGURE_ADD_STATIC --with-debug
+          $NGINX_CONFIGURE_CMD_WIN \
+          $NGINX_CONFIGURE_CC_MINGW \
+          $NGINX_CONFIGURE_ADD_STATIC \
+          --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
+          --with-debug
           make
 
       - name: Run tests with debug
@@ -212,7 +230,11 @@ jobs:
         if: matrix.compiler == 'mingw'
         shell: msys2 {0}
         run: |
-          %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_DYNAMIC% --with-debug
+          $NGINX_CONFIGURE_CMD_WIN \
+          $NGINX_CONFIGURE_CC_MINGW \
+          $NGINX_CONFIGURE_ADD_DYNAMIC \
+          --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
+          --with-debug
           make
 
       - name: Run tests dynamic debug
