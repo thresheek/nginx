@@ -118,7 +118,6 @@ jobs:
 
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
             echo "VCARCH=${{ matrix.env }}" >> $GITHUB_ENV
-            echo "VCSDK=8.1" >> $GITHUB_ENV
             echo "CL=/MP" >> $GITHUB_ENV
 
       - name: Download and unpack dependencies
@@ -141,7 +140,7 @@ jobs:
         shell: cmd
         run: |
           @echo on
-          call "%VCVARSALL%" %VCARCH% %VCSDK%
+          call "%VCVARSALL%" %VCARCH%
           bash ^
             %NGINX_CONFIGURE_CMD_WIN% ^
             %NGINX_CONFIGURE_CC_MSVC% ^
@@ -174,7 +173,7 @@ jobs:
         if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
-          call "%VCVARSALL%" %VCARCH% %VCSDK%
+          call "%VCVARSALL%" %VCARCH%
           nmake clean
 
       - name: Cleanup
@@ -192,7 +191,7 @@ jobs:
         shell: cmd
         run: |
           @echo on
-          call "%VCVARSALL%" %VCARCH% %VCSDK%
+          call "%VCVARSALL%" %VCARCH%
           bash ^
             %NGINX_CONFIGURE_CMD_WIN% ^
             %NGINX_CONFIGURE_CC_MSVC% ^
@@ -227,7 +226,7 @@ jobs:
         if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
-          call "%VCVARSALL%" %VCARCH% %VCSDK%
+          call "%VCVARSALL%" %VCARCH%
           nmake clean
 
       - name: Cleanup
