@@ -69,7 +69,7 @@ jobs:
                       --with-stream_ssl_module \
                       --with-stream_ssl_preread_module \
                       --with-stream_realip_module \
-                      --with-openssl=objs/lib/openssl \
+                      --with-openssl=objs/lib/openssl",
             "NGINX_CONFIGURE_CC_MSVC": "--with-cc=cl",
             "NGINX_CONFIGURE_CC_MINGW": "--with-cc=/c/strawberry/c/bin/gcc",
             "NGINX_CONFIGURE_ADD_STATIC": "--with-stream --with-mail",
