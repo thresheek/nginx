@@ -64,7 +64,8 @@ jobs:
                       --with-stream_ssl_preread_module \
                       --with-stream_realip_module \
                       --with-cc=cl \
-                      --with-openssl=objs/lib/openssl"
+                      --with-openssl=objs/lib/openssl \
+                      --with-openssl-opt='no-asm\ no-tests\ -D_WIN32_WINNT=0x0501'"
             }
             EOF
             )
@@ -96,9 +97,7 @@ jobs:
       - name: Configure and build nginx.exe
         run: |
           "$VCVARSALL" $VCARCH
-          $NGINX_CONFIGURE_CMD_WIN \
-                                --with-openssl-opt="no-asm no-tests -D_WIN32_WINNT=0x0501" \
-          || cat objs/autoconf.err
+          $NGINX_CONFIGURE_CMD_WIN
           nmake -f objs/Makefile
 
       - name: run tests
