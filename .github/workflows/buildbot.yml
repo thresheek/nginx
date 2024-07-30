@@ -19,12 +19,12 @@ jobs:
         os: [ windows-2022 ]
         arch: [ amd64 ]
         compiler: [ msvc, mingw ]
-        vcarch: [ x86 ]
+        vcarch: [ amd64 ]
         include:
           - os: windows-2022
             arch: amd64
             compiler: msvc
-            vcarch: amd64
+            vcarch: x86
       fail-fast: false
 
     steps:
