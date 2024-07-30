@@ -16,10 +16,10 @@ jobs:
     runs-on: [ "${{ matrix.os }}" ]
     strategy:
       matrix:
-        os: [ windows-2022 ]
-        arch: [ amd64 ]
-        compiler: [ msvc ]
-        vcarch: [ amd64, x86 ]
+        #        os: [ windows-2022 ]
+        #        arch: [ amd64 ]
+        #compiler: [ msvc ]
+        #vcarch: [ amd64, x86 ]
         include:
           - os: windows-2022
             arch: amd64
@@ -109,7 +109,7 @@ jobs:
         if: startsWith( matrix.compiler, 'mingw')
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{matrix.sys}}
+          msystem: ${{ matrix.compiler }}
           install: base-devel make git gcc
           update: true
 
