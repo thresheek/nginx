@@ -96,7 +96,7 @@ jobs:
 
       - name: Configure and build nginx.exe
         run: |
-          call "%VCVARSALL%" %VCARCH%
+          "%VCVARSALL%" %VCARCH%
           $NGINX_CONFIGURE_CMD_WIN \
           || cat objs/autoconf.err
           nmake -f objs/Makefile
