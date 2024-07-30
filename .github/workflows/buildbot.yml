@@ -29,10 +29,9 @@ jobs:
         run: |
             ENV_JSON=$(cat <<EOF
             {
-            "NGINX_CONFIGURE_CMD_WIN": "nconfigure.bat \
-                      auto/configure
-                      --builddir=objs
-                      --prefix=
+            "NGINX_CONFIGURE_CMD_WIN": "auto/configure \
+                      --builddir=objs \
+                      --prefix= \
                       --conf-path=conf/nginx.conf \
                       --pid-path=logs/nginx.pid \
                       --http-log-path=logs/access.log \
@@ -75,6 +74,9 @@ jobs:
 
             echo NGINX_CONFIGURE_CMD_WIN="$NGINX_CONFIGURE_CMD_WIN" >> $GITHUB_ENV
 
+            echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
+            echo "VCARCH=amd64" >> $GITHUB_ENV
+
       - name: Check out nginx tests
         run: |
           git clone https://github.com/nginx/nginx-tests
@@ -94,16 +96,18 @@ jobs:
 
       - name: Configure and build nginx.exe
         run: |
+          call "%VCVARSALL%" %VCARCH%
           $NGINX_CONFIGURE_CMD_WIN \
           || cat objs/autoconf.err
-          nmake.bat -f objs/Makefile
+          nmake -f objs/Makefile
 
       - name: run tests
         run: |
+          call "%VCVARSALL%" %VCARCH%
           cd nginx-tests
           prove -v ../t .
           cd ..
-          nmake.bat clean
+          nmake clean
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
