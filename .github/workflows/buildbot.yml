@@ -97,7 +97,7 @@ jobs:
             "NGINX_CONFIGURE_CC_MINGW": "--with-cc=/${{ matrix.toolchain }}/bin/${{ matrix.env }}-w64-mingw32-gcc.exe",
             "NGINX_CONFIGURE_ADD_STATIC": "--with-stream --with-mail",
             "NGINX_CONFIGURE_ADD_DYNAMIC": "--with-stream=dynamic --with-mail=dynamic",
-            "NGINX_CONFIGURE_OPENSSL_OPT": "no-asm no-tests -D_WIN32_WINNT=0x0501"
+            "NGINX_CONFIGURE_OPENSSL_OPT": "no-asm no-tests -D_WIN32_WINNT=0x0603"
             }
             EOF
             )
@@ -118,6 +118,7 @@ jobs:
 
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
             echo "VCARCH=${{ matrix.env }}" >> $GITHUB_ENV
+            echo "VCSDK=8.1" >> $GITHUB_ENV
             echo "CL=/MP" >> $GITHUB_ENV
 
       - name: Download and unpack dependencies
@@ -140,7 +141,7 @@ jobs:
         shell: cmd
         run: |
           @echo on
-          call "%VCVARSALL%" %VCARCH%
+          call "%VCVARSALL%" %VCARCH% %VCSDK%
           bash ^
             %NGINX_CONFIGURE_CMD_WIN% ^
             %NGINX_CONFIGURE_CC_MSVC% ^
@@ -172,7 +173,7 @@ jobs:
         if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
-          call "%VCVARSALL%" %VCARCH%
+          call "%VCVARSALL%" %VCARCH% %VCSDK%
           nmake clean
 
       - name: Cleanup
@@ -190,7 +191,7 @@ jobs:
         shell: cmd
         run: |
           @echo on
-          call "%VCVARSALL%" %VCARCH%
+          call "%VCVARSALL%" %VCARCH% %VCSDK%
           bash ^
             %NGINX_CONFIGURE_CMD_WIN% ^
             %NGINX_CONFIGURE_CC_MSVC% ^
@@ -224,7 +225,7 @@ jobs:
         if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
-          call "%VCVARSALL%" %VCARCH%
+          call "%VCVARSALL%" %VCARCH% %VCSDK%
           nmake clean
 
       - name: Cleanup
