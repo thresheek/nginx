@@ -106,12 +106,11 @@ jobs:
           repository: nginx/nginx-tests
           path: nginx-tests
 
-      - name: Install perl
+      - name: Upgrade perl
         shell: cmd
         run: |
           perl --version
-          choco install strawberryperl
-          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+          choco upgrade strawberryperl
           perl --version
 
       - name: Install msys2
