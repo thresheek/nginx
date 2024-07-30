@@ -121,6 +121,7 @@ jobs:
             echo "CL=/MP" >> $GITHUB_ENV
 
       - name: Download and transform dependencies
+        shell: bash
         run: |
           mkdir t
           mkdir objs
