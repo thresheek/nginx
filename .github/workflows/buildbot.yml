@@ -11,14 +11,20 @@ defaults:
     shell: 'bash -Eeo pipefail -x {0}'
 
 jobs:
-
   test:
-    name: $${ matrix.os }}
+    name: $${ matrix.os }}, ${{ matrix.compiler }}, ${{ matrix.vcarch }}
     runs-on: [ "${{ matrix.os }}" ]
     strategy:
       matrix:
-        os: [ windows-latest ]
+        os: [ windows-2022 ]
         arch: [ amd64 ]
+        compiler: [ msvc, mingw ]
+        vcarch: [ x86 ]
+      include:
+        os: windows-2022
+        arch: amd64
+        compiler: msvc
+        vcarch: amd64
       fail-fast: false
 
     steps:
@@ -63,19 +69,30 @@ jobs:
                       --with-stream_ssl_module \
                       --with-stream_ssl_preread_module \
                       --with-stream_realip_module \
-                      --with-cc=cl \
                       --with-openssl=objs/lib/openssl \
-                      --with-openssl-opt='no-asm no-tests -D_WIN32_WINNT=0x0501'"
+                      --with-openssl-opt='no-asm no-tests -D_WIN32_WINNT=0x0501'",
+            "NGINX_CONFIGURE_CC_MSVC": "--with-cc=cl",
+            "NGINX_CONFIGURE_CC_MINGW": "--with-cc=/c/strawberry/c/bin/gcc",
+            "NGINX_CONFIGURE_ADD_STATIC": "--with-stream --with-mail",
+            "NGINX_CONFIGURE_ADD_DYNAMIC": "--with-stream=dynamic --with-mail=dynamic"
             }
             EOF
             )
 
             NGINX_CONFIGURE_CMD_WIN=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_CMD_WIN')
+            NGINX_CONFIGURE_CC_MSVC=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_CC_MSVC')
+            NGINX_CONFIGURE_CC_MINGW=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_CC_MINGW')
+            NGINX_CONFIGURE_ADD_STATIC=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_ADD_STATIC')
+            NGINX_CONFIGURE_ADD_DYNAMIC=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_ADD_DYNAMIC')
 
             echo NGINX_CONFIGURE_CMD_WIN="$NGINX_CONFIGURE_CMD_WIN" >> $GITHUB_ENV
+            echo NGINX_CONFIGURE_CC_MSVC="$NGINX_CONFIGURE_CC_MSVC" >> $GITHUB_ENV
+            echo NGINX_CONFIGURE_CC_MINGW="$NGINX_CONFIGURE_CC_MINGW" >> $GITHUB_ENV
+            echo NGINX_CONFIGURE_ADD_STATIC="$NGINX_CONFIGURE_ADD_STATIC" >> $GITHUB_ENV
+            echo NGINX_CONFIGURE_ADD_DYNAMIC="$NGINX_CONFIGURE_ADD_DYNAMIC" >> $GITHUB_ENV
 
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
-            echo "VCARCH=amd64" >> $GITHUB_ENV
+            echo "VCARCH=${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Check out nginx tests
         run: |
@@ -95,53 +112,108 @@ jobs:
           tar -C objs/lib --transform 's/openssl-3.0.13/openssl/' -xzf ./openssl-3.0.13.tar.gz
           cp -R objs objs.deps
 
-      - name: Configure and build
-        if: 0
+      - name: Configure and build ${{ matrix.compiler }}
+        if: ${{ matrix.compiler == msvc }}
         shell: cmd
         run: |
           @echo on
           call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN%
+          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MSVC% %NGINX_CONFIGURE_ADD_STATIC%
           nmake -f objs/Makefile
+
+      - name: Configure and build ${{ matrix.compiler }}
+        if: ${{ matrix.compiler == mingw }}
+        shell: cmd
+        run: |
+          @echo on
+          call "%VCVARSALL%" %VCARCH%
+          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_STATIC%
+          bash make
 
       - name: Run tests
         if: 0
         shell: cmd
         run: |
-          @echo on
-          call "%VCVARSALL%" %VCARCH%
           cd nginx-tests
           prove -v ../t .
-          cd ..
-          nmake clean
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
           TEMP: "C:\\TEMP"
+
+      - name: Cleanup ${{ matrix.compiler }}
+        if: ${{ matrix.compiler == msvc }}
+        run: |
+          nmake clean
+
+      - name: Cleanup ${{ matrix.compiler }}
+        if: ${{ matrix.compiler == mingw }}
+        run: |
+          make clean
 
       - name: Restore dependencies
         run: |
-          mv objs.deps objs
+          cp -R objs.deps objs
 
-      - name: Configure and build with debug
+      - name: Configure and build ${{ matrix.compiler }} with debug
+        if: ${{ matrix.compiler == msvc }}
         shell: cmd
         run: |
           @echo on
           call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN% --with-debug
+          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MSVC% %NGINX_CONFIGURE_ADD_STATIC% --with-debug
           nmake -f objs/Makefile
 
-      - name: Run tests with debug
+      - name: Configure and build ${{ matrix.compiler }} with debug
+        if: ${{ matrix.compiler == mingw }}
         shell: cmd
         run: |
           @echo on
           call "%VCVARSALL%" %VCARCH%
+          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_STATIC% --with-debug
+          bash make
+
+      - name: Run tests with debug
+        if: 0
+        shell: cmd
+        run: |
           cd nginx-tests
           prove -v ../t .
-          cd ..
-          nmake clean
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
           TEMP: "C:\\TEMP"
 
+      - name: Cleanup ${{ matrix.compiler }}
+        if: ${{ matrix.compiler == msvc }}
+        run: |
+          nmake clean
+
+      - name: Cleanup ${{ matrix.compiler }}
+        if: ${{ matrix.compiler == mingw }}
+        run: |
+          make clean
+
+      - name: Restore dependencies
+        run: |
+          cp -R objs.deps objs
+
+      - name: Configure and build ${{ matrix.compiler }} dynamic debug
+        if: ${{ matrix.compiler == mingw }}
+        shell: cmd
+        run: |
+          @echo on
+          call "%VCVARSALL%" %VCARCH%
+          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_DYNAMIC% --with-debug
+          bash make
+
+      - name: Run tests dynamic debug
+        if: 0
+        shell: cmd
+        run: |
+          cd nginx-tests
+          prove -v ../t .
+        env:
+          TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
+          PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
+          TEMP: "C:\\TEMP"
