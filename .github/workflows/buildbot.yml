@@ -18,13 +18,17 @@ jobs:
       matrix:
         os: [ windows-2022 ]
         arch: [ amd64 ]
-        compiler: [ msvc, mingw ]
-        vcarch: [ amd64 ]
+        compiler: [ msvc ]
+        vcarch: [ amd64, x86 ]
         include:
           - os: windows-2022
             arch: amd64
-            compiler: msvc
-            vcarch: x86
+            compiler: mingw64
+            env: x86_64
+          - os: windows-2022
+            arch: amd64
+            compiler: mingw32
+            env: i686
       fail-fast: false
 
     steps:
@@ -102,9 +106,10 @@ jobs:
 
 
       - name: Install msys2
-        if: matrix.compiler == 'mingw'
+        if: startsWith( matrix.compiler, 'mingw')
         uses: msys2/setup-msys2@v2
         with:
+          msystem: ${{matrix.sys}}
           install: base-devel make git gcc
           update: true
 
@@ -136,7 +141,7 @@ jobs:
           nmake -f objs/Makefile
 
       - name: Configure and build ${{ matrix.compiler }}
-        if: matrix.compiler == 'mingw'
+        if: startsWith( matrix.compiler, 'mingw')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
@@ -164,7 +169,7 @@ jobs:
           nmake clean
 
       - name: Cleanup ${{ matrix.compiler }}
-        if: matrix.compiler == 'mingw'
+        if: startsWith( matrix.compiler, 'mingw')
         shell: msys2 {0}
         run: |
           make clean
@@ -188,7 +193,7 @@ jobs:
           nmake -f objs/Makefile
 
       - name: Configure and build ${{ matrix.compiler }} with debug
-        if: matrix.compiler == 'mingw'
+        if: startsWith( matrix.compiler, 'mingw')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
@@ -217,7 +222,7 @@ jobs:
           nmake clean
 
       - name: Cleanup ${{ matrix.compiler }}
-        if: matrix.compiler == 'mingw'
+        if: startsWith( matrix.compiler, 'mingw')
         shell: msys2 {0}
         run: |
           make clean
@@ -227,7 +232,7 @@ jobs:
           cp -R objs.deps objs
 
       - name: Configure and build ${{ matrix.compiler }} dynamic debug
-        if: matrix.compiler == 'mingw'
+        if: startsWith( matrix.compiler, 'mingw')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
