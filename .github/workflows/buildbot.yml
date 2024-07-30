@@ -93,8 +93,10 @@ jobs:
           tar -C objs/lib --transform 's/zlib-1.3.1/zlib/' -xzf ./zlib-1.3.1.tar.gz
           curl -LO https://github.com/openssl/openssl/releases/download/openssl-3.0.13/openssl-3.0.13.tar.gz
           tar -C objs/lib --transform 's/openssl-3.0.13/openssl/' -xzf ./openssl-3.0.13.tar.gz
+          cp -R objs objs.deps
 
-      - name: Configure and build nginx.exe
+      - name: Configure and build
+        if: 0
         shell: cmd
         run: |
           @echo on
@@ -102,7 +104,34 @@ jobs:
           bash %NGINX_CONFIGURE_CMD_WIN%
           nmake -f objs/Makefile
 
-      - name: run tests
+      - name: Run tests
+        if: 0
+        shell: cmd
+        run: |
+          @echo on
+          call "%VCVARSALL%" %VCARCH%
+          cd nginx-tests
+          prove -v ../t .
+          cd ..
+          nmake clean
+        env:
+          TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
+          PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
+          TEMP: "C:\\TEMP"
+
+      - name: Restore dependencies
+        run: |
+          mv objs.dep objs
+
+      - name: Configure and build with debug
+        shell: cmd
+        run: |
+          @echo on
+          call "%VCVARSALL%" %VCARCH%
+          bash %NGINX_CONFIGURE_CMD_WIN% --with-debug
+          nmake -f objs/Makefile
+
+      - name: Run tests with debug
         shell: cmd
         run: |
           @echo on
