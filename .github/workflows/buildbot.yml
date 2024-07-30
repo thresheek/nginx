@@ -128,10 +128,10 @@ jobs:
         run: |
           @echo on
           call "%VCVARSALL%" %VCARCH%
-          bash \
-            %NGINX_CONFIGURE_CMD_WIN% \
-            %NGINX_CONFIGURE_CC_MSVC% \
-            %NGINX_CONFIGURE_ADD_STATIC% \
+          bash ^
+            %NGINX_CONFIGURE_CMD_WIN% ^
+            %NGINX_CONFIGURE_CC_MSVC% ^
+            %NGINX_CONFIGURE_ADD_STATIC% ^
             --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%"
           nmake -f objs/Makefile
 
@@ -179,11 +179,11 @@ jobs:
         run: |
           @echo on
           call "%VCVARSALL%" %VCARCH%
-          bash \
-          %NGINX_CONFIGURE_CMD_WIN% \
-          %NGINX_CONFIGURE_CC_MSVC% \
-          %NGINX_CONFIGURE_ADD_STATIC% \
-          --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%" \
+          bash ^
+          %NGINX_CONFIGURE_CMD_WIN% ^
+          %NGINX_CONFIGURE_CC_MSVC% ^
+          %NGINX_CONFIGURE_ADD_STATIC% ^
+          --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%" ^
           --with-debug
           nmake -f objs/Makefile
 
