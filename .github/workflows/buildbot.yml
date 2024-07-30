@@ -121,7 +121,7 @@ jobs:
 
       - name: Restore dependencies
         run: |
-          mv objs.dep objs
+          mv objs.deps objs
 
       - name: Configure and build with debug
         shell: cmd
