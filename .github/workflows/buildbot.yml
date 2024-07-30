@@ -15,7 +15,7 @@ jobs:
         os: [ windows-2022 ]
         arch: [ amd64 ]
         toolchain: [ msvc ]
-        env: [ amd64, x86 ]
+        env: [ x64, x86 ]
         include:
           - os: windows-2022
             arch: amd64
