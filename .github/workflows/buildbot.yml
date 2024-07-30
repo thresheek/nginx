@@ -110,7 +110,8 @@ jobs:
         shell: cmd
         run: |
           perl --version
-          choco upgrade strawberryperl
+          choco uninstall strawberryperl
+          choco install strawberryperl
           perl --version
 
       - name: Install msys2
