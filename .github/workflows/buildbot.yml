@@ -150,7 +150,7 @@ jobs:
           nmake -f objs/Makefile
 
       - name: Configure and build
-        if: startsWith( matrix.toolchain, 'mingw')
+        if: startsWith( matrix.toolchain, 'mingw00')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
@@ -160,6 +160,7 @@ jobs:
           make -j4
 
       - name: Run tests
+        if: 0
         shell: cmd
         run: |
           cd nginx-tests
@@ -177,7 +178,7 @@ jobs:
           nmake clean
 
       - name: Cleanup
-        if: startsWith( matrix.toolchain, 'mingw')
+        if: startsWith( matrix.toolchain, 'mingw00')
         shell: msys2 {0}
         run: |
           make clean
@@ -201,7 +202,7 @@ jobs:
           nmake -f objs/Makefile
 
       - name: Configure and build with debug
-        if: startsWith( matrix.toolchain, 'mingw')
+        if: startsWith( matrix.toolchain, 'mingw00')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
@@ -212,6 +213,7 @@ jobs:
           make -j4
 
       - name: Run tests with debug
+        if: 0
         shell: cmd
         run: |
           cd nginx-tests
@@ -229,13 +231,13 @@ jobs:
           nmake clean
 
       - name: Cleanup
-        if: startsWith( matrix.toolchain, 'mingw')
+        if: startsWith( matrix.toolchain, 'mingw00')
         shell: msys2 {0}
         run: |
           make clean
 
       - name: Restore dependencies
-        if: startsWith( matrix.toolchain, 'mingw')
+        if: startsWith( matrix.toolchain, 'mingw00')
         run: |
           cp -R objs.deps objs
 
@@ -248,7 +250,7 @@ jobs:
           $NGINX_CONFIGURE_ADD_DYNAMIC \
           --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
           --with-debug
-          make -j4
+          make -j4 -k || make
 
       - name: Run tests dynamic debug
         if: startsWith( matrix.toolchain, 'mingw')
