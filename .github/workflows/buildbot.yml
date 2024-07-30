@@ -12,22 +12,22 @@ defaults:
 
 jobs:
   test:
-    name: ${{ matrix.os }}, ${{ matrix.compiler }}, ${{ matrix.vcarch != '' && matrix.vcarh }}
+    name: ${{ matrix.os }}, ${{ matrix.toolchain }} ${{ matrix.env }}
     runs-on: [ "${{ matrix.os }}" ]
     strategy:
       matrix:
-        #        os: [ windows-2022 ]
-        #        arch: [ amd64 ]
-        #compiler: [ msvc ]
-        #vcarch: [ amd64, x86 ]
+        os: [ windows-2022 ]
+        arch: [ amd64 ]
+        toolchain: [ msvc ]
+        env: [ amd64, x86 ]
         include:
           - os: windows-2022
             arch: amd64
-            compiler: mingw64
+            toolchain: mingw64
             env: x86_64
           - os: windows-2022
             arch: amd64
-            compiler: mingw32
+            toolchain: mingw32
             env: i686
       fail-fast: false
 
@@ -75,7 +75,7 @@ jobs:
                       --with-stream_realip_module \
                       --with-openssl=objs/lib/openssl",
             "NGINX_CONFIGURE_CC_MSVC": "--with-cc=cl",
-            "NGINX_CONFIGURE_CC_MINGW": "--with-cc=/${{ matrix.compiler }}/bin/${{ matrix.env }}-w64-mingw32-gcc.exe",
+            "NGINX_CONFIGURE_CC_MINGW": "--with-cc=/${{ matrix.toolchain }}/bin/${{ matrix.env }}-w64-mingw32-gcc.exe",
             "NGINX_CONFIGURE_ADD_STATIC": "--with-stream --with-mail",
             "NGINX_CONFIGURE_ADD_DYNAMIC": "--with-stream=dynamic --with-mail=dynamic",
             "NGINX_CONFIGURE_OPENSSL_OPT": "no-asm no-tests -D_WIN32_WINNT=0x0501"
@@ -98,7 +98,7 @@ jobs:
             echo NGINX_CONFIGURE_OPENSSL_OPT="$NGINX_CONFIGURE_OPENSSL_OPT" >> $GITHUB_ENV
 
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
-            echo "VCARCH=${{ matrix.vcarch }}" >> $GITHUB_ENV
+            echo "VCARCH=${{ matrix.env }}" >> $GITHUB_ENV
 
       - name: Check out nginx tests
         run: |
@@ -106,10 +106,10 @@ jobs:
 
 
       - name: Install msys2
-        if: startsWith( matrix.compiler, 'mingw')
+        if: startsWith( matrix.toolchain, 'mingw')
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.compiler }}
+          msystem: ${{ matrix.toolchain }}
           install: base-devel make git mingw-w64-${{ matrix.env }}-gcc
           update: true
 
@@ -127,8 +127,8 @@ jobs:
           tar -C objs/lib --transform 's/openssl-3.0.13/openssl/' -xzf ./openssl-3.0.13.tar.gz
           cp -R objs objs.deps
 
-      - name: Configure and build ${{ matrix.compiler }}
-        if: matrix.compiler == 'msvc'
+      - name: Configure and build
+        if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
           @echo on
@@ -140,8 +140,8 @@ jobs:
             --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%"
           nmake -f objs/Makefile
 
-      - name: Configure and build ${{ matrix.compiler }}
-        if: startsWith( matrix.compiler, 'mingw')
+      - name: Configure and build
+        if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
@@ -151,7 +151,6 @@ jobs:
           make
 
       - name: Run tests
-        if: 0
         shell: cmd
         run: |
           cd nginx-tests
@@ -161,15 +160,15 @@ jobs:
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
           TEMP: "C:\\TEMP"
 
-      - name: Cleanup ${{ matrix.compiler }}
-        if: matrix.compiler == 'msvc'
+      - name: Cleanup ${{ matrix.toolchain }}
+        if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
           call "%VCVARSALL%" %VCARCH%
           nmake clean
 
-      - name: Cleanup ${{ matrix.compiler }}
-        if: startsWith( matrix.compiler, 'mingw')
+      - name: Cleanup ${{ matrix.toolchain }}
+        if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
           make clean
@@ -178,8 +177,8 @@ jobs:
         run: |
           cp -R objs.deps objs
 
-      - name: Configure and build ${{ matrix.compiler }} with debug
-        if: matrix.compiler == 'msvc'
+      - name: Configure and build ${{ matrix.toolchain }} with debug
+        if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
           @echo on
@@ -192,8 +191,8 @@ jobs:
           --with-debug
           nmake -f objs/Makefile
 
-      - name: Configure and build ${{ matrix.compiler }} with debug
-        if: startsWith( matrix.compiler, 'mingw')
+      - name: Configure and build ${{ matrix.toolchain }} with debug
+        if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
@@ -204,7 +203,6 @@ jobs:
           make
 
       - name: Run tests with debug
-        if: 0
         shell: cmd
         run: |
           cd nginx-tests
@@ -214,15 +212,15 @@ jobs:
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
           TEMP: "C:\\TEMP"
 
-      - name: Cleanup ${{ matrix.compiler }}
-        if: matrix.compiler == 'msvc'
+      - name: Cleanup ${{ matrix.toolchain }}
+        if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
           call "%VCVARSALL%" %VCARCH%
           nmake clean
 
-      - name: Cleanup ${{ matrix.compiler }}
-        if: startsWith( matrix.compiler, 'mingw')
+      - name: Cleanup ${{ matrix.toolchain }}
+        if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
           make clean
@@ -231,8 +229,8 @@ jobs:
         run: |
           cp -R objs.deps objs
 
-      - name: Configure and build ${{ matrix.compiler }} dynamic debug
-        if: startsWith( matrix.compiler, 'mingw')
+      - name: Configure and build ${{ matrix.toolchain }} dynamic debug
+        if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
           $NGINX_CONFIGURE_CMD_WIN \
@@ -243,7 +241,6 @@ jobs:
           make
 
       - name: Run tests dynamic debug
-        if: 0
         shell: msys2 {0}
         run: |
           cd nginx-tests
