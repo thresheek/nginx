@@ -12,7 +12,7 @@ defaults:
 
 jobs:
   test:
-    name: $${ matrix.os }}, ${{ matrix.compiler }}, ${{ matrix.vcarch }}
+    name: ${{ matrix.os }}, ${{ matrix.compiler }}, ${{ matrix.vcarch }}
     runs-on: [ "${{ matrix.os }}" ]
     strategy:
       matrix:
