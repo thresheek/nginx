@@ -145,6 +145,7 @@ jobs:
         if: matrix.compiler == 'msvc'
         shell: cmd
         run: |
+          call "%VCVARSALL%" %VCARCH%
           nmake clean
 
       - name: Cleanup ${{ matrix.compiler }}
@@ -189,6 +190,7 @@ jobs:
         if: matrix.compiler == 'msvc'
         shell: cmd
         run: |
+          call "%VCVARSALL%" %VCARCH%
           nmake clean
 
       - name: Cleanup ${{ matrix.compiler }}
