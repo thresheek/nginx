@@ -193,11 +193,11 @@ jobs:
           @echo on
           call "%VCVARSALL%" %VCARCH%
           bash ^
-          %NGINX_CONFIGURE_CMD_WIN% ^
-          %NGINX_CONFIGURE_CC_MSVC% ^
-          %NGINX_CONFIGURE_ADD_STATIC% ^
-          --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%" ^
-          --with-debug
+            %NGINX_CONFIGURE_CMD_WIN% ^
+            %NGINX_CONFIGURE_CC_MSVC% ^
+            %NGINX_CONFIGURE_ADD_STATIC% ^
+            --with-openssl-opt="%NGINX_CONFIGURE_OPENSSL_OPT%" ^
+            --with-debug
           nmake -f objs/Makefile
 
       - name: Configure and build with debug
@@ -235,6 +235,7 @@ jobs:
           make clean
 
       - name: Restore dependencies
+        if: startsWith( matrix.toolchain, 'mingw')
         run: |
           cp -R objs.deps objs
 
