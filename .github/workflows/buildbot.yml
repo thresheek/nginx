@@ -113,7 +113,7 @@ jobs:
           cp -R objs objs.deps
 
       - name: Configure and build ${{ matrix.compiler }}
-        if: ${{ matrix.compiler == "msvc" }}
+        if: matrix.compiler == 'msvc'
         shell: cmd
         run: |
           @echo on
@@ -122,7 +122,7 @@ jobs:
           nmake -f objs/Makefile
 
       - name: Configure and build ${{ matrix.compiler }}
-        if: ${{ matrix.compiler == "mingw" }}
+        if: matrix.compiler == 'mingw'
         shell: cmd
         run: |
           @echo on
@@ -142,12 +142,12 @@ jobs:
           TEMP: "C:\\TEMP"
 
       - name: Cleanup ${{ matrix.compiler }}
-        if: ${{ matrix.compiler == "msvc" }}
+        if: matrix.compiler == 'msvc'
         run: |
           nmake clean
 
       - name: Cleanup ${{ matrix.compiler }}
-        if: ${{ matrix.compiler == "mingw" }}
+        if: matrix.compiler == 'mingw'
         run: |
           make clean
 
@@ -156,7 +156,7 @@ jobs:
           cp -R objs.deps objs
 
       - name: Configure and build ${{ matrix.compiler }} with debug
-        if: ${{ matrix.compiler == "msvc" }}
+        if: matrix.compiler == 'msvc'
         shell: cmd
         run: |
           @echo on
@@ -165,7 +165,7 @@ jobs:
           nmake -f objs/Makefile
 
       - name: Configure and build ${{ matrix.compiler }} with debug
-        if: ${{ matrix.compiler == "mingw" }}
+        if: matrix.compiler == 'mingw'
         shell: cmd
         run: |
           @echo on
@@ -185,12 +185,12 @@ jobs:
           TEMP: "C:\\TEMP"
 
       - name: Cleanup ${{ matrix.compiler }}
-        if: ${{ matrix.compiler == "msvc" }}
+        if: matrix.compiler == 'msvc'
         run: |
           nmake clean
 
       - name: Cleanup ${{ matrix.compiler }}
-        if: ${{ matrix.compiler == "mingw" }}
+        if: matrix.compiler == 'mingw'
         run: |
           make clean
 
@@ -199,7 +199,7 @@ jobs:
           cp -R objs.deps objs
 
       - name: Configure and build ${{ matrix.compiler }} dynamic debug
-        if: ${{ matrix.compiler == "mingw" }}
+        if: matrix.compiler == 'mingw'
         shell: cmd
         run: |
           @echo on
