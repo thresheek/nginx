@@ -92,7 +92,7 @@ jobs:
             echo NGINX_CONFIGURE_ADD_DYNAMIC="$NGINX_CONFIGURE_ADD_DYNAMIC" >> $GITHUB_ENV
 
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
-            echo "VCARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+            echo "VCARCH=${{ matrix.vcarch }}" >> $GITHUB_ENV
 
       - name: Check out nginx tests
         run: |
