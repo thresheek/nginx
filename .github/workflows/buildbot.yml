@@ -164,7 +164,7 @@ jobs:
         shell: cmd
         run: |
           cd nginx-tests
-          prove -v -j4 ../t .
+          prove -v ../t .
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
@@ -216,7 +216,7 @@ jobs:
         shell: cmd
         run: |
           cd nginx-tests
-          prove -v -j4 ../t .
+          prove -v ../t .
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
@@ -255,7 +255,7 @@ jobs:
         if: startsWith( matrix.toolchain, 'mingw')
         run: |
           cd nginx-tests
-          prove -v -j4 ../t .
+          prove -v ../t .
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
