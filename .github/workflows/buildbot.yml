@@ -94,6 +94,9 @@ jobs:
             echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
             echo "VCARCH=${{ matrix.vcarch }}" >> $GITHUB_ENV
 
+            echo "C:\\msys64\\usr\\bin" >> $GITHUB_PATH
+            echo "C:\\msys64\\mingw64\\bin" >> $GITHUB_PATH
+
       - name: Check out nginx tests
         run: |
           git clone https://github.com/nginx/nginx-tests
@@ -123,12 +126,10 @@ jobs:
 
       - name: Configure and build ${{ matrix.compiler }}
         if: matrix.compiler == 'mingw'
-        shell: cmd
+        shell: msys2 {0}
         run: |
-          @echo on
-          call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_STATIC%
-          bash make
+          $NGINX_CONFIGURE_CMD_WIN $NGINX_CONFIGURE_CC_MINGW $NGINX_CONFIGURE_ADD_STATIC
+          make
 
       - name: Run tests
         if: 0
@@ -150,6 +151,7 @@ jobs:
 
       - name: Cleanup ${{ matrix.compiler }}
         if: matrix.compiler == 'mingw'
+        shell: msys2 {0}
         run: |
           make clean
 
@@ -168,12 +170,10 @@ jobs:
 
       - name: Configure and build ${{ matrix.compiler }} with debug
         if: matrix.compiler == 'mingw'
-        shell: cmd
+        shell: msys2 {0}
         run: |
-          @echo on
-          call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_STATIC% --with-debug
-          bash make
+          $NGINX_CONFIGURE_CMD_WIN $NGINX_CONFIGURE_CC_MINGW $NGINX_CONFIGURE_ADD_STATIC --with-debug
+          make
 
       - name: Run tests with debug
         if: 0
@@ -195,6 +195,7 @@ jobs:
 
       - name: Cleanup ${{ matrix.compiler }}
         if: matrix.compiler == 'mingw'
+        shell: msys2 {0}
         run: |
           make clean
 
@@ -204,16 +205,14 @@ jobs:
 
       - name: Configure and build ${{ matrix.compiler }} dynamic debug
         if: matrix.compiler == 'mingw'
-        shell: cmd
+        shell: msys2 {0}
         run: |
-          @echo on
-          call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_DYNAMIC% --with-debug
-          bash make
+          %NGINX_CONFIGURE_CMD_WIN% %NGINX_CONFIGURE_CC_MINGW% %NGINX_CONFIGURE_ADD_DYNAMIC% --with-debug
+          make
 
       - name: Run tests dynamic debug
         if: 0
-        shell: cmd
+        shell: msys2 {0}
         run: |
           cd nginx-tests
           prove -v ../t .
