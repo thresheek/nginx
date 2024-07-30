@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir t
           mkdir objs
-          mkdir objs\lib
+          mkdir objs\\lib
           curl -LO https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz
           tar -C objs/lib --transform 's/pcre2-10.39/pcre/' -xzf ./pcre2-10.39.tar.gz
           echo '#include <stdint.h>' > objs\lib\pcre\src\inttypes.h
