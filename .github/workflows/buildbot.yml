@@ -98,7 +98,7 @@ jobs:
         shell: cmd
         run: |
           call "%VCVARSALL%" %VCARCH%
-          bash $NGINX_CONFIGURE_CMD_WIN
+          bash %NGINX_CONFIGURE_CMD_WIN%
           nmake -f objs/Makefile
 
       - name: run tests
