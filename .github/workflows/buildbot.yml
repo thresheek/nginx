@@ -106,7 +106,7 @@ jobs:
         run: |
           call "%VCVARSALL%" %VCARCH%
           cd nginx-tests
-          bash prove -v ../t .
+          prove -v ../t .
           cd ..
           nmake clean
         env:
