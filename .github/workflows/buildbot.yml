@@ -105,8 +105,8 @@ jobs:
         if: matrix.compiler == 'mingw'
         uses: msys2/setup-msys2@v2
         with:
-          install: base-devel make mercurial git
-          update: false
+          install: base-devel make git gcc
+          update: true
 
       - name: Download and transform dependencies
         run: |
@@ -142,8 +142,7 @@ jobs:
           $NGINX_CONFIGURE_CMD_WIN \
           $NGINX_CONFIGURE_CC_MINGW \
           $NGINX_CONFIGURE_ADD_STATIC \
-          --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
-          || cat /d/a/nginx/nginx/objs/lib/pcre/config.log
+          --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT"
           make
 
       - name: Run tests
