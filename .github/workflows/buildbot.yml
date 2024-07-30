@@ -65,7 +65,7 @@ jobs:
                       --with-stream_realip_module \
                       --with-cc=cl \
                       --with-openssl=objs/lib/openssl \
-                      --with-openssl-opt=\"no-asm no-tests -D_WIN32_WINNT=0x0501\""
+                      --with-openssl-opt='no-asm\ no-tests\ -D_WIN32_WINNT=0x0501'"
             }
             EOF
             )
