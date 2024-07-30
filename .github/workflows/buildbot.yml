@@ -104,7 +104,6 @@ jobs:
         run: |
           git clone https://github.com/nginx/nginx-tests
 
-
       - name: Install msys2
         if: startsWith( matrix.toolchain, 'mingw')
         uses: msys2/setup-msys2@v2
@@ -160,14 +159,14 @@ jobs:
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
           TEMP: "C:\\TEMP"
 
-      - name: Cleanup ${{ matrix.toolchain }}
+      - name: Cleanup
         if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
           call "%VCVARSALL%" %VCARCH%
           nmake clean
 
-      - name: Cleanup ${{ matrix.toolchain }}
+      - name: Cleanup
         if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
@@ -177,7 +176,7 @@ jobs:
         run: |
           cp -R objs.deps objs
 
-      - name: Configure and build ${{ matrix.toolchain }} with debug
+      - name: Configure and build with debug
         if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
@@ -191,7 +190,7 @@ jobs:
           --with-debug
           nmake -f objs/Makefile
 
-      - name: Configure and build ${{ matrix.toolchain }} with debug
+      - name: Configure and build with debug
         if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
@@ -212,14 +211,14 @@ jobs:
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
           TEMP: "C:\\TEMP"
 
-      - name: Cleanup ${{ matrix.toolchain }}
+      - name: Cleanup
         if: matrix.toolchain == 'msvc'
         shell: cmd
         run: |
           call "%VCVARSALL%" %VCARCH%
           nmake clean
 
-      - name: Cleanup ${{ matrix.toolchain }}
+      - name: Cleanup
         if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
@@ -229,7 +228,7 @@ jobs:
         run: |
           cp -R objs.deps objs
 
-      - name: Configure and build ${{ matrix.toolchain }} dynamic debug
+      - name: Configure and build dynamic with debug
         if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
@@ -241,6 +240,7 @@ jobs:
           make
 
       - name: Run tests dynamic debug
+        if: startsWith( matrix.toolchain, 'mingw')
         shell: msys2 {0}
         run: |
           cd nginx-tests
