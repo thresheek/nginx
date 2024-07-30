@@ -95,18 +95,17 @@ jobs:
           tar -C objs/lib --transform 's/openssl-3.0.13/openssl/' -xzf ./openssl-3.0.13.tar.gz
 
       - name: Configure and build nginx.exe
-        shell: cmd
         run: |
-          call "%VCVARSALL%" %VCARCH%
-          bash %NGINX_CONFIGURE_CMD_WIN%
+          "$VCVARSALL" $VCARCH
+          $NGINX_CONFIGURE_CMD_WIN
           nmake -f objs/Makefile
 
       - name: run tests
-        shell: cmd
         run: |
-          call "%VCVARSALL%" %VCARCH%
+          "$VCVARSALL" $VCARCH
           cd nginx-tests
-          bash prove -v ../t .
+          echo $PATH
+          prove -v ../t .
           cd ..
           nmake clean
         env:
