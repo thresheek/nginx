@@ -119,7 +119,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.toolchain }}
-          install: automake base-devel git make mingw-w64-${{ matrix.env }}-gcc
+          install: autoconf automake base-devel git make mingw-w64-${{ matrix.env }}-gcc
           update: true
 
       - name: Download and transform dependencies
