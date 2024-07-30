@@ -1,0 +1,111 @@
+name: buildbot
+
+on:
+  workflow_call:
+
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+defaults:
+  run:
+    shell: 'bash -Eeo pipefail -x {0}'
+
+jobs:
+
+  test:
+    name: $${ matrix.os }}
+    runs-on: [ "${{ matrix.os }}" ]
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        arch: [ amd64 ]
+      fail-fast: false
+
+    steps:
+      - name: checkout v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Set the defaults and set up environment
+        run: |
+            ENV_JSON=$(cat <<EOF
+            {
+            "NGINX_CONFIGURE_CMD_WIN": "nconfigure.bat \
+                      auto/configure
+                      --builddir=objs
+                      --prefix=
+                      --conf-path=conf/nginx.conf \
+                      --pid-path=logs/nginx.pid \
+                      --http-log-path=logs/access.log \
+                      --error-log-path=logs/error.log \
+                      --sbin-path=nginx.exe \
+                      --http-client-body-temp-path=temp/client_body_temp \
+                      --http-proxy-temp-path=temp/proxy_temp \
+                      --http-fastcgi-temp-path=temp/fastcgi_temp \
+                      --with-cc-opt=-DFD_SETSIZE=1024 \
+                      --with-pcre=objs/lib/pcre \
+                      --with-zlib=objs/lib/zlib \
+                      --with-select_module \
+                      --with-http_realip_module \
+                      --with-http_addition_module \
+                      --with-http_sub_module \
+                      --with-http_dav_module \
+                      --with-http_stub_status_module \
+                      --with-http_flv_module \
+                      --with-http_mp4_module \
+                      --with-http_gunzip_module \
+                      --with-http_gzip_static_module \
+                      --with-http_random_index_module \
+                      --with-http_secure_link_module \
+                      --with-http_ssl_module \
+                      --with-mail_ssl_module \
+                      --with-http_auth_request_module \
+                      --with-http_v2_module \
+                      --with-http_slice_module \
+                      --with-stream_ssl_module \
+                      --with-stream_ssl_preread_module \
+                      --with-stream_realip_module \
+                      --with-cc=cl \
+                      --with-openssl=objs/lib/openssl \
+                      --with-openssl-opt='no-asm no-tests -D_WIN32_WINNT=0x0501'"
+            }
+            EOF
+            )
+
+            NGINX_CONFIGURE_CMD_WIN=$(echo $ENV_JSON | jq -r '.NGINX_CONFIGURE_CMD_WIN')
+
+            echo NGINX_CONFIGURE_CMD_WIN="$NGINX_CONFIGURE_CMD_WIN" >> $GITHUB_ENV
+
+      - name: Check out nginx tests
+        run: |
+          git clone https://github.com/nginx/nginx-tests
+
+      - name: Download and transform dependencies
+        run: |
+          mkdir t
+          mkdir objs
+          mkdir objs\lib
+          curl -LO https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz
+          tar -C objs/lib --transform 's/pcre2-10.39/pcre/' -xzf ./pcre2-10.39.tar.gz
+          echo '#include <stdint.h>' > objs\lib\pcre\src\inttypes.h
+          curl -LO https://zlib.net/fossils/zlib-1.3.1.tar.gz
+          tar -C objs/lib --transform 's/zlib-1.3.1/zlib/' -xzf ./zlib-1.3.1.tar.gz
+          curl -LO https://github.com/openssl/openssl/releases/download/openssl-3.0.13/openssl-3.0.13.tar.gz
+          tar -C objs/lib --transform 's/openssl-3.0.13/openssl/' -xzf ./openssl-3.0.13.tar.gz
+
+      - name: Configure and build nginx.exe
+        run: |
+          $NGINX_CONFIGURE_CMD_WIN \
+          || cat objs/autoconf.err
+          nmake.bat -f objs/Makefile
+
+      - name: run tests
+        run: |
+          cd nginx-tests
+          prove -v ../t .
+          cd ..
+          nmake.bat clean
+        env:
+          TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
+          PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
+          TEMP: "C:\\TEMP"
+
