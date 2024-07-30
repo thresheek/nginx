@@ -254,8 +254,9 @@ jobs:
 
       - name: Run tests dynamic debug
         if: startsWith( matrix.toolchain, 'mingw')
-        shell: msys2 {0}
         run: |
+          ls -la objs
+          ls -la D:/a/nginx/nginx/objs/ngx_mail_module.so
           cd nginx-tests
           prove -v ../t .
         env:
