@@ -143,6 +143,7 @@ jobs:
 
       - name: Cleanup ${{ matrix.compiler }}
         if: matrix.compiler == 'msvc'
+        shell: cmd
         run: |
           nmake clean
 
@@ -186,6 +187,7 @@ jobs:
 
       - name: Cleanup ${{ matrix.compiler }}
         if: matrix.compiler == 'msvc'
+        shell: cmd
         run: |
           nmake clean
 
