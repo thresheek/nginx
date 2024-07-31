@@ -38,6 +38,7 @@ jobs:
           path: nginx-tests
 
       - name: Upgrade perl
+        if: 0
         shell: cmd
         run: |
           perl --version
