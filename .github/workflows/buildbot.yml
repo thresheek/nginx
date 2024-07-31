@@ -251,7 +251,7 @@ jobs:
         if: startsWith( matrix.toolchain, 'mingw')
         shell: cmd
         run: |
-          call "%VCVARSALL%" %VCARCH%
+          call "%VCVARSALL%" x86
           ls objs
           ls D:/a/nginx/nginx/objs/ngx_mail_module.so
           dumpbin /headers objs/nginx
