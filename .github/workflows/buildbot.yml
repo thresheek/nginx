@@ -8,21 +8,15 @@ env:
 
 jobs:
   test:
-    name: ${{ matrix.os }}, ${{ matrix.toolchain }}, ${{ matrix.env }}
-    runs-on: [ "${{ matrix.os }}" ]
+    name: windows-2022, ${{ matrix.toolchain }}, ${{ matrix.env }}
+    runs-on: windows-2022
     strategy:
       matrix:
-        #        os: [ windows-2022 ]
-        #arch: [ amd64 ]
         #toolchain: [ msvc ]
         #env: [ x64, x86 ]
         include:
-          - os: windows-2022
-            arch: amd64
             toolchain: mingw32
             env: i686
-          - os: windows-2022
-            arch: amd64
             toolchain: mingw64
             env: x86_64
       fail-fast: false
