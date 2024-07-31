@@ -167,6 +167,7 @@ jobs:
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
+          TEMP: "C:\\TEMP"
 
       - name: Cleanup
         if: matrix.toolchain == 'msvc'
@@ -219,6 +220,7 @@ jobs:
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
+          TEMP: "C:\\TEMP"
 
       - name: Cleanup
         if: matrix.toolchain == 'msvc'
@@ -253,10 +255,11 @@ jobs:
       - name: Run tests dynamic debug
         if: startsWith( matrix.toolchain, 'mingw')
         run: |
-          ls objs
-          ls D:/a/nginx/nginx/objs/ngx_mail_module.so
+          ls -la objs
+          ls -la D:/a/nginx/nginx/objs/ngx_mail_module.so
           cd nginx-tests
           prove -v ../t .
         env:
           TEST_NGINX_BINARY: "${{ github.workspace }}\\objs\\nginx.exe"
           PERL5LIB: "${{ github.workspace }}\\nginx-tests\\lib"
+          TEMP: "C:\\TEMP"
