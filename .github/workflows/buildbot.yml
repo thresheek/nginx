@@ -251,6 +251,8 @@ jobs:
           --with-debug
           make
           ls objs/
+          dumpbin /headers objs/nginx
+          dumpbin /headers objs/ngx_mail_module.so
 
       - name: Run tests dynamic debug
         if: startsWith( matrix.toolchain, 'mingw')
