@@ -250,13 +250,14 @@ jobs:
           --with-openssl-opt="$NGINX_CONFIGURE_OPENSSL_OPT" \
           --with-debug
           make
-          ls -la objs/
+          ls objs/
 
       - name: Run tests dynamic debug
         if: startsWith( matrix.toolchain, 'mingw')
+        shell: cmd
         run: |
-          ls -la objs
-          ls -la D:/a/nginx/nginx/objs/ngx_mail_module.so
+          ls objs
+          ls D:/a/nginx/nginx/objs/ngx_mail_module.so
           cd nginx-tests
           prove -v ../t .
         env:
