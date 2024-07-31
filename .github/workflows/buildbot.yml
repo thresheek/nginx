@@ -259,7 +259,7 @@ jobs:
           call "%VCVARSALL%" x86
           ls objs
           ls D:/a/nginx/nginx/objs/ngx_mail_module.so
-          dumpbin /headers objs/nginx
+          dumpbin /headers objs/nginx.exe
           dumpbin /headers objs/ngx_mail_module.so
           cd nginx-tests
           prove -v ../t .
