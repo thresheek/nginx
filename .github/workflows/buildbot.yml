@@ -12,10 +12,10 @@ jobs:
     runs-on: [ "${{ matrix.os }}" ]
     strategy:
       matrix:
-        os: [ windows-2022 ]
-        arch: [ amd64 ]
-        toolchain: [ msvc ]
-        env: [ x64, x86 ]
+        #        os: [ windows-2022 ]
+        #arch: [ amd64 ]
+        #toolchain: [ msvc ]
+        #env: [ x64, x86 ]
         include:
           - os: windows-2022
             arch: amd64
