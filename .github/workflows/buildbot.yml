@@ -246,11 +246,12 @@ jobs:
           --with-debug
           make
           ls objs/
+          tar cjf objs.tar objs/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
-          path: objs/
+          name: objs-${{ matrix.toolchain }}
+          path: objs.tar
 
       - name: Run tests dynamic debug
         if: startsWith( matrix.toolchain, 'mingw')
